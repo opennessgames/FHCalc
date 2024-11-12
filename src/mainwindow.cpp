@@ -2,7 +2,7 @@
  * @Author: xixi_
  * @Date: 2024-11-10 17:52:17
  * @LastEditors: xixi_
- * @LastEditTime: 2024-11-12 20:04:38
+ * @LastEditTime: 2024-11-12 21:11:53
  * @FilePath: /FHCalc/src/mainwindow.cpp
  * Copyright (c) 2020-2024 by xixi_ , All Rights Reserved.
  */
@@ -183,7 +183,7 @@ void MainWindow::FH_CalculatePostfix(ThisDynamicStack *Expression)
 
     for (int index = 0; index <= Expression->ThisTop; index++)
     {
-        if (!FH_Is_Op(Expression->ThisCharArr[index]))
+        if (FH_Is_Op(Expression->ThisCharArr[index]))
         {
             /* 弹出两个操作数 */
             char *a = (char *)XIXI_DynamicStackPop(&Stack);
@@ -204,8 +204,8 @@ void MainWindow::FH_CalculatePostfix(ThisDynamicStack *Expression)
     }
 
     char *StackTop = (char *)XIXI_DynamicStackPop(&Stack);     /* 弹出栈顶 */
-    ExpressionStr.clear();                                     /* 将当前输入清空 */
     ui->DisplayText->setText(QString::number(atof(StackTop))); /* 显示在界面上 */
+    ExpressionStr.clear();                                     /* 将当前输入清空 */
     XIXI_DynamicStackFree(&Stack);
     free(StackTop);
     /* PS:如果直接返回`atof(StackTop)`会造成内存泄漏 */
@@ -213,7 +213,7 @@ void MainWindow::FH_CalculatePostfix(ThisDynamicStack *Expression)
 
 int MainWindow::FH_Is_Op(char *op)
 {
-    return strcmp(op, "+") || strcmp(op, "-") || strcmp(op, "*") || strcmp(op, "/");
+    return !strcmp(op, "+") || !strcmp(op, "-") || !strcmp(op, "*") || !strcmp(op, "/");
 }
 
 double MainWindow::FH_Calc(double num1, double num2, char *op)
