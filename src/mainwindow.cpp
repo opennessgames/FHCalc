@@ -2,7 +2,7 @@
  * @Author: xixi_
  * @Date: 2024-11-10 17:52:17
  * @LastEditors: xixi_
- * @LastEditTime: 2024-11-12 21:11:53
+ * @LastEditTime: 2024-11-13 20:20:36
  * @FilePath: /FHCalc/src/mainwindow.cpp
  * Copyright (c) 2020-2024 by xixi_ , All Rights Reserved.
  */
@@ -27,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->Number0, &QPushButton::clicked, this, &MainWindow::FH_ZeroBtnClicked); /* 数字0被按下 */
     connect(ui->Number1, &QPushButton::clicked, this, &MainWindow::FH_OneBtnClicked);  /* 数字1被按下 */
     connect(ui->BtnADD, &QPushButton::clicked, this, &MainWindow::FH_AddBtnClicked);   /* 加号 */
+    connect(ui->BtnDIV, &QPushButton::clicked, this, &MainWindow::FH_DivBtnClicked);
     /* 链接基本操作槽函数 */
     connect(ui->BtnNo, &QPushButton::clicked, this, &MainWindow::FH_Undo);     /* 删除 */
     connect(ui->BtnClear, &QPushButton::clicked, this, &MainWindow::FH_Clear); /* 清除 */
@@ -53,6 +54,12 @@ void MainWindow::FH_OneBtnClicked()
 void MainWindow::FH_AddBtnClicked()
 {
     ExpressionStr += '+';
+    ui->DisplayText->setText(ExpressionStr);
+}
+
+void MainWindow::FH_DivBtnClicked()
+{
+    ExpressionStr += '/';
     ui->DisplayText->setText(ExpressionStr);
 }
 
@@ -126,7 +133,8 @@ void MainWindow::FH_Eval()
             }
             if (FH_GetPriority(ch) != -1) /* 如果是操作符 */
             {
-                while (!XIXI_DynamicStackIsEmpty(&OpStack) && /* 处理操作符栈中的优先级 */
+                /* 处理操作符栈中的优先级 */
+                while (!XIXI_DynamicStackIsEmpty(&OpStack) &&
                        FH_GetPriority(*XIXI_DynamicStackPeek(&OpStack)) >= FH_GetPriority(ch))
                 {
                     /* 弹出操作符栈的栈顶操作符并推入输出栈 */
@@ -216,6 +224,11 @@ int MainWindow::FH_Is_Op(char *op)
     return !strcmp(op, "+") || !strcmp(op, "-") || !strcmp(op, "*") || !strcmp(op, "/");
 }
 
+int MainWindow::FH_Is_Point(char *op)
+{
+    return !strcmp(op, ".");
+}
+
 double MainWindow::FH_Calc(double num1, double num2, char *op)
 {
     switch (*op)
@@ -227,7 +240,11 @@ double MainWindow::FH_Calc(double num1, double num2, char *op)
     case '*':
         return num1 * num2;
     case '/':
-        return num1 / num2;
+        if (num2 != 0)
+        {
+            return num1 / num2;
+        }
+        return 0;
     case '^':
         return pow(num1, num2);
     default:
@@ -236,7 +253,7 @@ double MainWindow::FH_Calc(double num1, double num2, char *op)
 }
 
 /* 如果你想体验超级计算机，就可以把这段代码取消注释，别忘记把上面的注释了 */
-// double MainWindow::FH_CalculatePostfix(ThisDynamicStack *Expression)
+// void MainWindow::FH_CalculatePostfix(ThisDynamicStack *Expression)
 // {
 //     ThisDynamicStack *Stack;
 //     for (int index=0;index<=Expression->ThisTop;index++){
@@ -247,5 +264,4 @@ double MainWindow::FH_Calc(double num1, double num2, char *op)
 //     }
 //     XIXI_DynamicStackPrint(Stack);
 //     XIXI_DynamicStackFree(Stack);
-//     return 0;
 // }
